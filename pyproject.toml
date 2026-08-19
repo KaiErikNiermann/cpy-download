@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "cpy-download"
+version = "0.1.0"
+description = "Download videos from URLs and copy them to your Linux clipboard"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "cpy_download", from = "src"}]
+
+
+[tool.poetry.scripts]
+cpydl = "cpy_download.cli:main"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = ">=0.15.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+ruff = "^0.8.0"
+mypy = "^1.13.0"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "TCH"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
