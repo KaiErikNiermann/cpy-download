@@ -39,10 +39,26 @@ cpy-download/
 │       └── downloader.py
 ├── tests/
 │   ├── test_basic.py
-│   └── test_clipboard.py
+│   ├── test_clipboard.py
+│   └── test_cli.py
 ├── pyproject.toml
 └── README.md
 ```
+
+## Development
+
+```bash
+poetry install
+
+poetry run pytest                                          # tests
+poetry run ruff check src tests                            # lint
+poetry run ruff format --check src tests                   # formatting
+poetry run mypy src                                        # types
+poetry run radon cc src --average --show-complexity        # complexity report
+poetry run xenon --max-absolute B --max-modules B --max-average A src   # complexity gate
+```
+
+CI runs all of the above on Python 3.11-3.14.
 
 ## Contributing
 
@@ -56,4 +72,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-See the [LICENSE](LICENSE) file for details.
+MIT - see the [LICENSE](LICENSE) file for details.
