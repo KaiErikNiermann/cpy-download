@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Annotated, Optional
+# Typer resolves these annotations at runtime, so Path must be a real import
+# rather than a TYPE_CHECKING-only one.
+from pathlib import Path  # noqa: TC003
+from typing import Annotated
 
 import typer
 
@@ -19,7 +21,9 @@ app = typer.Typer(
 
 @app.command()
 def grab(
-    url: Annotated[str, typer.Argument(help="URL of the video to download (Twitter, YouTube, etc.)")],
+    url: Annotated[
+        str, typer.Argument(help="URL of the video to download (Twitter, YouTube, etc.)")
+    ],
     clipboard: Annotated[
         ClipboardBackend,
         typer.Option("--clipboard", "-c", help="Clipboard backend to use."),
@@ -33,8 +37,10 @@ def grab(
         typer.Option("--format", "-f", help="yt-dlp format spec."),
     ] = "best[ext=mp4]/best",
     output_dir: Annotated[
-        Optional[Path],
-        typer.Option("--output-dir", "-o", help="Directory to save the video. Defaults to a temp dir."),
+        Path | None,
+        typer.Option(
+            "--output-dir", "-o", help="Directory to save the video. Defaults to a temp dir."
+        ),
     ] = None,
     keep: Annotated[
         bool,

@@ -38,9 +38,12 @@ def download_video(
         [
             ytdlp,
             "--no-playlist",
-            "-f", format_spec,
-            "-o", output_template,
-            "--print", "after_move:filepath",
+            "-f",
+            format_spec,
+            "-o",
+            output_template,
+            "--print",
+            "after_move:filepath",
             "--no-simulate",
             url,
         ],
@@ -52,9 +55,7 @@ def download_video(
     # yt-dlp --print filepath outputs the final path on the last non-empty line
     lines = [line.strip() for line in result.stdout.strip().splitlines() if line.strip()]
     if not lines:
-        raise RuntimeError(
-            f"yt-dlp did not output a file path.\nstderr: {result.stderr}"
-        )
+        raise RuntimeError(f"yt-dlp did not output a file path.\nstderr: {result.stderr}")
 
     downloaded = Path(lines[-1])
     if not downloaded.exists():

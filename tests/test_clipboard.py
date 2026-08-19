@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from cpy_download.clipboard import (
     ClipboardBackend,
-    CopyMethod,
     _video_mime,
     detect_backend,
 )
-from pathlib import Path
 
 
 class TestDetectBackend:
@@ -39,9 +38,11 @@ class TestDetectBackend:
 
     def test_no_display_raises(self) -> None:
         env = {"XDG_SESSION_TYPE": "", "WAYLAND_DISPLAY": "", "DISPLAY": ""}
-        with patch.dict(os.environ, env, clear=False):
-            with pytest.raises(RuntimeError, match="Cannot detect display server"):
-                detect_backend()
+        with (
+            patch.dict(os.environ, env, clear=False),
+            pytest.raises(RuntimeError, match="Cannot detect display server"),
+        ):
+            detect_backend()
 
 
 class TestVideoMime:

@@ -5,11 +5,14 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
-from enum import Enum
-from pathlib import Path
+from enum import StrEnum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
-class ClipboardBackend(str, Enum):
+class ClipboardBackend(StrEnum):
     """Supported clipboard backends."""
 
     XCLIP = "xclip"
@@ -17,7 +20,7 @@ class ClipboardBackend(str, Enum):
     AUTO = "auto"
 
 
-class CopyMethod(str, Enum):
+class CopyMethod(StrEnum):
     """How to represent the file on the clipboard."""
 
     URI = "uri"  # text/uri-list (standard freedesktop, most compatible)
