@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -10,6 +11,9 @@ import pytest
 
 from cpy_download.clipboard import (
     ClipboardBackend,
+    CopyMethod,
+    _copy_wl,
+    _copy_xclip,
     _video_mime,
     detect_backend,
 )
@@ -57,3 +61,31 @@ class TestVideoMime:
 
     def test_case_insensitive(self) -> None:
         assert _video_mime(Path("test.MP4")) == "video/mp4"
+
+
+class TestDetachedStdio:
+    """The resident clipboard daemon must not inherit our stdout/stderr.
+
+    xclip and wl-copy both stay alive after we return, to serve the selection
+    they own. If they inherit a pipe -- as they do under `cpydl ... 2>&1 | x`
+    -- they hold its write end open and the reader never sees EOF, so the whole
+    pipeline hangs long after cpydl has finished its work.
+    """
+
+    @pytest.mark.parametrize(
+        ("copy_fn", "tool"),
+        [(_copy_xclip, "xclip"), (_copy_wl, "wl-copy")],
+    )
+    def test_daemon_stdio_is_detached(self, copy_fn: object, tool: str, tmp_path: Path) -> None:
+        video = tmp_path / "clip.mp4"
+        video.write_bytes(b"data")
+
+        with (
+            patch("cpy_download.clipboard.shutil.which", return_value=f"/usr/bin/{tool}"),
+            patch("cpy_download.clipboard.subprocess.run") as run,
+        ):
+            copy_fn(video, CopyMethod.URI)  # type: ignore[operator]
+
+        kwargs = run.call_args.kwargs
+        assert kwargs["stdout"] == subprocess.DEVNULL
+        assert kwargs["stderr"] == subprocess.DEVNULL

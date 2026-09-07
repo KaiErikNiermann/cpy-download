@@ -86,6 +86,27 @@ def _video_mime(path: Path) -> str:
     return MIME_BY_SUFFIX.get(path.suffix.lower(), "application/octet-stream")
 
 
+def _run_clipboard_tool(command: list[str], payload: bytes) -> None:
+    """Hand the payload to a clipboard tool, detaching its stdio.
+
+    Both xclip and wl-copy must stay resident after we return: on X11 and
+    Wayland alike the selection is served by its owning client rather than
+    stored by the display server. That daemon inherits whatever stdio we give
+    it and outlives us -- so if our stderr is a pipe (`cpydl ... 2>&1 | less`)
+    it holds the write end open and the reader never sees EOF, hanging the
+    pipeline long after the copy succeeded. wl-copy nulls its own stdin and
+    stdout but *not* stderr; xclip nulls nothing. Detaching here is what keeps
+    `cpydl` usable in a shell pipeline.
+    """
+    subprocess.run(
+        command,
+        input=payload,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
 def _copy_xclip(file_path: Path, method: CopyMethod) -> None:
     tool = _check_tool("xclip")
     abs_path = file_path.resolve()
@@ -100,11 +121,7 @@ def _copy_xclip(file_path: Path, method: CopyMethod) -> None:
         payload = abs_path.read_bytes()
         mime = _video_mime(abs_path)
 
-    subprocess.run(
-        [tool, "-selection", "clipboard", "-t", mime, "-i"],
-        input=payload,
-        check=True,
-    )
+    _run_clipboard_tool([tool, "-selection", "clipboard", "-t", mime, "-i"], payload)
 
 
 def _copy_wl(file_path: Path, method: CopyMethod) -> None:
@@ -121,11 +138,7 @@ def _copy_wl(file_path: Path, method: CopyMethod) -> None:
         payload = abs_path.read_bytes()
         mime = _video_mime(abs_path)
 
-    subprocess.run(
-        [tool, "--type", mime],
-        input=payload,
-        check=True,
-    )
+    _run_clipboard_tool([tool, "--type", mime], payload)
 
 
 def copy_to_clipboard(
