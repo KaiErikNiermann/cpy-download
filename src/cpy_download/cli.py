@@ -22,7 +22,7 @@ app = typer.Typer(
 @app.command()
 def grab(
     url: Annotated[
-        str, typer.Argument(help="URL of the video to download (Twitter, YouTube, etc.)")
+        str, typer.Argument(help="URL of the video to download (Reddit, Twitter, YouTube, etc.)")
     ],
     clipboard: Annotated[
         ClipboardBackend,
@@ -33,9 +33,14 @@ def grab(
         typer.Option("--method", "-m", help="How to place the file on the clipboard."),
     ] = CopyMethod.URI,
     format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="yt-dlp format spec."),
-    ] = "best[ext=mp4]/best",
+        str | None,
+        typer.Option(
+            "--format",
+            "-f",
+            help="yt-dlp format spec. Defaults to one chosen per source "
+            "(Reddit needs a DASH-aware spec so audio is not dropped).",
+        ),
+    ] = None,
     output_dir: Annotated[
         Path | None,
         typer.Option(
