@@ -17,7 +17,7 @@ typer = ">=0.15.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3,<10.0"
-ruff = ">=0.8,<0.17"
+ruff = ">=0.8,<0.18"
 mypy = ">=1.13,<3.0"
 radon = "^6.0.1"
 xenon = "^0.9.3"
